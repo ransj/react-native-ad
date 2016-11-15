@@ -4,6 +4,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
 apply plugin: 'de.undercouch.download'
+apply plugin: 'com.neenbedankt.android-apt'
 
 import de.undercouch.gradle.tasks.download.Download
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -211,6 +212,10 @@ task packageReactNdkLibs(dependsOn: buildReactNdkLib, type: Copy) {
     from "$buildDir/react-ndk/all"
     exclude '**/libjsc.so'
     into "$buildDir/react-ndk/exported"
+     copy{
+       from "$buildDir/react-ndk/exported/armeabi-v7a"
+       into "$buildDir/react-ndk/exported/armeabi"
+     }
 }
 
 task packageReactNdkLibsForBuck(dependsOn: packageReactNdkLibs, type: Copy) {
@@ -223,7 +228,7 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 14
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
@@ -279,6 +284,7 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp-ws:3.4.1'
     compile 'com.squareup.okio:okio:1.9.0'
     compile 'org.webkit:android-jsc:r174650'
+    apt project(':annotation');
 
     testCompile "junit:junit:${JUNIT_VERSION}"
     testCompile "org.powermock:powermock-api-mockito:${POWERMOCK_VERSION}"
@@ -292,6 +298,10 @@ dependencies {
     androidTestCompile fileTree(dir: 'src/main/third-party/java/buck-android-support/', include: ['*.jar'])
     androidTestCompile 'com.android.support.test:runner:0.3'
     androidTestCompile "org.mockito:mockito-core:${MOCKITO_CORE_VERSION}"
+}
+
+task clean(type: Delete, overwrite: true) {
+    delete 'build/generated', 'build/output', 'build/tmp', 'build/intermediates'
 }
 
 apply from: 'release.gradle'
